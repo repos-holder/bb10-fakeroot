@@ -125,6 +125,10 @@
 #ifdef FAKEROOT_DB_PATH
 # include <dirent.h>
 #endif
+#ifdef __QNX__
+#include <sys/select.h>
+#define MAX(a,b) max(a,b)
+#endif
 
 #ifndef FAKEROOT_FAKENET
 # define FAKE_KEY msg_key
