@@ -6,7 +6,7 @@
 usage () {
 cat - >&2 <<EOF
 fakeroot, create a fake root environment.
-   usage: fakeroot [-l|--lib fakerootlib] [-f|--faked fakedbin]
+   usage: fakeroot [-p faked pid] [-l|--lib fakerootlib] [-f|--faked fakedbin]
                    [-i file] [-s file] [-u|--unknown-is-real]
 		   [-b|--fd-base fd] [-h|--help] [-v|--version]
                    [--] [command]
@@ -70,7 +70,7 @@ getopt*) # GNU getopt
     FAKE_TEMP=`getopt -l lib: -l faked: -l unknown-is-real -l fd-base: -l version -l help -- +l:f:i:s:ub:vh "$@"`
     ;;
 *) # POSIX getopt ?
-    FAKE_TEMP=`getopt l:f:i:s:ub:vh "$@"`
+    FAKE_TEMP=`getopt p:l:f:i:s:ub:vh "$@"`
     ;;
 esac
 
@@ -82,10 +82,15 @@ eval set -- "$FAKE_TEMP"
 
 FAKEDOPTS=""
 PIPEIN=""
+KNOWN_PID=""
 WAITINTRAP=0
 
 while test "X$1" != "X--"; do
   case "$1" in
+    -p)
+       shift
+       KNOWN_PID=$1
+       ;;
     -l|--lib)
        shift
        LIB=`eval echo "$1"`
@@ -162,7 +167,11 @@ then
 fi
 
 unset FAKEROOTKEY
-KEY_PID=`eval $FAKED $FAKEDOPTS $PIPEIN`
+if [[ $KNOWN_PID == "" ]]; then
+	KEY_PID=`eval $FAKED $FAKEDOPTS $PIPEIN`
+else
+	KEY_PID=$KNOWN_PID
+fi
 FAKEROOTKEY=`echo $KEY_PID|cut -d: -f1`
 PID=`echo $KEY_PID|cut -d: -f2`
 
