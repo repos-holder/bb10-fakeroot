@@ -154,6 +154,10 @@ extern int setenv (const char *name, const char *value, int replace);
 #if !HAVE_DECL_UNSETENV
 extern int unsetenv (const char *name);
 #endif
+#ifdef __QNX__
+#include <pwd.h>
+#include "blackberry.h"
+#endif
 
 
 /*
