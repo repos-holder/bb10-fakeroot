@@ -193,7 +193,28 @@ static volatile int detached = 0;
 int debug = 0, unknown_is_real = 0;
 char *save_file = NULL;
 
+static uid_t faked_real_uid = (uid_t)-1;
+static gid_t faked_real_gid = (gid_t)-1;
+
 void cleanup(int);
+
+static int env_get_id(const char *key) {
+  char *str = getenv(key);
+  if (str)
+    return atoi(str);
+  return 0;
+}
+static void read_id(unsigned int *id, const char *key) {
+  if (*id == (unsigned int)-1)
+    *id = env_get_id(key);
+}
+
+static void read_real_uid() {
+  read_id(&faked_real_uid, FAKEROOTUID_ENV);
+}
+static void read_real_gid() {
+  read_id(&faked_real_gid, FAKEROOTGID_ENV);
+}
 
 #ifdef FAKEROOT_FAKENET
 static void fail(const char *msg)
@@ -755,9 +776,9 @@ void process_chown(struct fake_msg *buf){
        by root.root, so we have to maintain that pretense when the
        caller asks to leave an id unchanged. */
     if ((uint32_t)st.uid == (uint32_t)-1)
-       st.uid = 0;
+       st.uid = faked_real_uid;
     if ((uint32_t)st.gid == (uint32_t)-1)
-       st.gid = 0;
+       st.gid = faked_real_gid;
     insert_or_overwrite(&st, buf->remote);
   }
 }
@@ -802,8 +823,8 @@ void process_chmod(struct fake_msg *buf){
   }
   else{
     st=&buf->st;
-    st->uid=0;
-    st->gid=0;
+    st->uid=faked_real_uid;
+    st->gid=faked_real_gid;
   }
   insert_or_overwrite(st, buf->remote);
 }
@@ -824,8 +845,8 @@ void process_mknod(struct fake_msg *buf){
   }
   else{
     st=&buf->st;
-    st->uid=0;
-    st->gid=0;
+    st->uid=faked_real_uid;
+    st->gid=faked_real_gid;
   }
   insert_or_overwrite(st, buf->remote);
 }
@@ -842,8 +863,8 @@ void process_stat(struct fake_msg *buf){
     if (debug)
       fprintf(stderr,"FAKEROOT:    (previously unknown)\n");
     if (!unknown_is_real) {
-      buf->st.uid=0;
-      buf->st.gid=0;
+      buf->st.uid=faked_real_uid;
+      buf->st.gid=faked_real_gid;
     }
   }
   else{
@@ -951,9 +972,9 @@ void process_setxattr(struct fake_msg *buf)
        by root.root, so we have to maintain that pretense when the
        caller asks to leave an id unchanged. */
     if ((uint32_t)st.uid == (uint32_t)-1)
-       st.uid = 0;
+       st.uid = faked_real_uid;
     if ((uint32_t)st.gid == (uint32_t)-1)
-       st.gid = 0;
+       st.gid = faked_real_gid;
     insert_or_overwrite(&st, buf->remote);
     i = data_find(&buf->st, buf->remote);
   }
@@ -1322,6 +1343,8 @@ int main(int argc, char **argv){
     fprintf(stderr,"Please, don't run fakeroot from within fakeroot!\n");
     exit(1);
   }
+  read_real_uid();
+  read_real_gid();
 
   while(*(++argv)){
     if(!strcmp(*argv,"--key"))
