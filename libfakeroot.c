@@ -1052,7 +1052,7 @@ int WRAP_MKNOD MKNOD_ARG(int ver UNUSED,
 {
 #ifdef __QNX__
   // mknod(..,mkdir()'s mode | S_IFDIR,..) is a magic part of dir creation
-  if (mode & S_IFDIR)
+  if (mode & S_IFDIR && (mode&0700)==0700)
     return next_mknod(pathname, mode, dev);
 #endif
   INT_STRUCT_STAT st;

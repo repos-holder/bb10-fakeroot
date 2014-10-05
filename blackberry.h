@@ -14,7 +14,7 @@ struct passwd* getpwnam( const char* name )
 		return NULL;
 
 	if (!strcmp(name, "root"))
-		obj->pw_dir = &faked_pw_dir;
+		obj->pw_dir = (char *) &faked_pw_dir;
 
 	return obj;
 }
@@ -30,7 +30,7 @@ struct passwd* getpwuid( uid_t uid )
                 return NULL;
 
 	if (uid == 0)
-		obj->pw_dir = &faked_pw_dir;
+		obj->pw_dir = (char *) &faked_pw_dir;
 
 	return obj;
 }
