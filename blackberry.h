@@ -1,3 +1,5 @@
+#define QNX_SHMEM_HOOKS 1
+
 struct passwd* (*getpwnam_orig)( const char* name );
 struct passwd* (*getpwuid_orig)( uid_t uid );
 char faked_pw_dir[] = "/accounts/devuser";
