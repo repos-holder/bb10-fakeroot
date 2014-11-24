@@ -1127,10 +1127,6 @@ int WRAP_MKNODAT MKNODAT_ARG(int ver UNUSED,
 int mkdir(const char *path, mode_t mode){
   INT_STRUCT_STAT st;
   int r;
-#if defined (__QNX__) && defined (QNX_SHMEM_HOOKS)
-  if (!strncmp(path, "/tmp/", 5))
-    return 0;
-#endif
   mode_t old_mask=umask(022);
 
   umask(old_mask);
