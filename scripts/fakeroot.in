@@ -50,9 +50,9 @@ getopt ()
 }
 
 # strip /bin/fakeroot to find install prefix
-FAKEROOT_PREFIX=@prefix@
-FAKEROOT_BINDIR=@bindir@
-FAKEROOT_LIBDIR=@libdir@
+FAKEROOT_PREFIX=${QNX_HOST}
+FAKEROOT_BINDIR=${FAKEROOT_PREFIX}/bin
+FAKEROOT_LIBDIR=${FAKEROOT_PREFIX}/lib
 
 USEABSLIBPATH=@LDPRELOADABS@
 LIB=lib@fakeroot_transformed@@DLSUFFIX@
